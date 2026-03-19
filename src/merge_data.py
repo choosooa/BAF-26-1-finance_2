@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "datas")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "datas")
 
 # ── 1. 일별 데이터 ──────────────────────────────────────────────
 daily_files = {
@@ -24,6 +24,7 @@ monthly_files = {
 # eia 파일은 상단 4줄 메타데이터 + 1줄 헤더 구조
 weekly_files = {
     "eia_OilInventories_week.csv": "OilInventories_week",
+    "eia_OilProduction_week.csv":  "OilProduction_week",
 }
 
 
@@ -53,6 +54,22 @@ def load_weekly_eia(filename, new_col):
     return df  # 주별 날짜 그대로 유지 (나머지는 NaN)
 
 
+def load_opec_production(filename, new_col):
+    path = os.path.join(DATA_DIR, filename)
+    # 행: 국가별 지표, 열: 날짜(Jan 1973, ...)
+    # 1행: 메타, 2행: 날짜 헤더 → skiprows=1로 읽기
+    raw = pd.read_csv(path, skiprows=1, header=None)
+    date_cols = raw.iloc[0, 2:]  # "Jan 1973", "Feb 1973", ...
+    # INTL.53-1-*-TBPD.M: 국가별 총 석유 생산량 행 추출
+    mask = raw[0].str.match(r"INTL\.53-1-\w+-TBPD\.M", na=False)
+    values = raw.loc[mask, 2:].apply(pd.to_numeric, errors="coerce")
+    total = values.sum(axis=0)
+    dates = pd.to_datetime(date_cols.values, format="%b %Y")
+    result = pd.DataFrame({new_col: total.values}, index=dates)
+    result.index.name = "date"
+    return result
+
+
 # ── 일별 데이터로 공통 날짜 인덱스 생성 ──────────────────────────
 daily_frames = [load_daily(f, c) for f, c in daily_files.items()]
 merged = daily_frames[0]
@@ -67,6 +84,10 @@ for filename, col in monthly_files.items():
 for filename, col in weekly_files.items():
     df = load_weekly_eia(filename, col)
     merged = merged.join(df, how="outer")
+
+# ── OPEC 생산량 (월별, 국가 합산) ────────────────────────────────
+df_opec = load_opec_production("eia_OPECProduction_month.csv", "OPECProduction_month")
+merged = merged.join(df_opec, how="outer")
 
 # ── 인덱스 정렬 & 기간 필터 ──────────────────────────────────
 merged = merged.sort_index()
