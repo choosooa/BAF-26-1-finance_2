@@ -1,0 +1,2 @@
+best_cv_rmse,max_depth,learning_rate,num_leaves,min_child_samples,subsample,subsample_freq,colsample_bytree,reg_alpha,reg_lambda,min_split_gain
+1.7934207958601074,4,0.044635901521768134,13,154,0.6202083881990965,2,0.5761376254756898,1.156732719914599,0.04245867573059574,0.21242177333881365

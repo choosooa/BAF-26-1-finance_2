@@ -1,0 +1,5 @@
+version,dataset,model,feature_count,R2_mean,RMSE_mean,MAE_mean,Directional_Accuracy_mean,best_iter_list,note
+original_default_36feat,dataset4_36_features,LGBM_default,36,-0.0044,1.8014,1.1529,,,기존 원본 baseline
+original_tuned_36feat,dataset4_36_features,LGBM_optuna,36,0.0001,1.7976,1.1515,,,기존 원본 Optuna 40 trials
+new_default,dataset4_derived_full.csv,new_default,26,-0.00021382975259511827,1.7978304492477868,1.1519284805500025,0.5047675706103835,10/50/9/14/1,이번 노트북 재실행 결과
+new_optuna,dataset4_derived_full.csv,new_optuna,26,0.003043348272158064,1.7934207958601074,1.155979329574374,0.5055422704461655,1/4/25/582/1,이번 노트북 재실행 결과
